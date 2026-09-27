@@ -1,0 +1,32 @@
+# Dataset (do not push to GitHub -- see README for source/regeneration)
+data/raw/*.csv
+
+# Trained model artifacts
+models/*.joblib
+
+# Generated outputs
+outputs/evaluation/*
+outputs/predictions/*
+!outputs/evaluation/.gitkeep
+!outputs/predictions/.gitkeep
+
+# Python
+__pycache__/
+*.pyc
+*.egg-info/
+.pytest_cache/
+build/
+dist/
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# Editors / OS
+.vscode/
+.idea/
+.DS_Store
+
+# Streamlit
+.streamlit/
