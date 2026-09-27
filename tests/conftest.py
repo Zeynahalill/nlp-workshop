@@ -5,6 +5,7 @@ import pytest
 from nlp_project.config import LABEL_COLUMN, TEXT_COLUMN
 from nlp_project.feature_extraction import fit_tfidf_vectorizer, transform_texts
 from nlp_project.modeling import train_model
+from nlp_project.pipeline_signature import compute_pipeline_signature
 from sklearn.naive_bayes import MultinomialNB
 
 
@@ -35,6 +36,7 @@ def tiny_artifact_path(tmp_path_factory):
         "classes": sorted(df[LABEL_COLUMN].unique()),
         "n_training_examples": len(df),
         "test_metrics": {"accuracy": 1.0},
+        "pipeline_signature": compute_pipeline_signature(),
     }
 
     path = tmp_path_factory.mktemp("artifacts") / "model_artifacts.joblib"

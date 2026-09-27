@@ -27,6 +27,7 @@ from nlp_project.evaluation import (
 )
 from nlp_project.feature_extraction import fit_tfidf_vectorizer, transform_texts
 from nlp_project.modeling import build_candidate_models, split_dataset, train_model
+from nlp_project.pipeline_signature import compute_pipeline_signature
 from nlp_project.preprocessing import run_pipeline
 
 
@@ -122,6 +123,7 @@ def main():
     # ------------------------------------------------------------------
     section("7. SAVE MODEL ARTIFACT")
     config.MODELS_DIR.mkdir(parents=True, exist_ok=True)
+    pipeline_signature = compute_pipeline_signature()
     artifact = {
         "vectorizer": vectorizer,
         "model": best_model,
@@ -129,9 +131,16 @@ def main():
         "classes": sorted(df[config.LABEL_COLUMN].unique()),
         "n_training_examples": len(train_df),
         "test_metrics": test_metrics,
+        # Fingerprint of preprocessing.py / feature_extraction.py / the
+        # TF-IDF & stopword/contraction settings at train time. Checked
+        # again on every load_artifact() call (see prediction.py) so a
+        # stale artifact is rejected loudly instead of silently producing
+        # near-uniform, meaningless live predictions.
+        "pipeline_signature": pipeline_signature,
     }
     joblib.dump(artifact, config.MODEL_ARTIFACT_PATH)
     print(f"Saved model artifact to {config.MODEL_ARTIFACT_PATH}")
+    print(f"Pipeline signature: {pipeline_signature}")
 
     section("DONE")
     print("Run `streamlit run app.py` to try live predictions.")

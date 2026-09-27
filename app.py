@@ -21,6 +21,7 @@ import pandas as pd
 import streamlit as st
 
 from nlp_project.config import RAW_DATA_PATH
+from nlp_project.pipeline_signature import PipelineSignatureMismatch
 from nlp_project.prediction import load_artifact, predict_text
 
 st.set_page_config(page_title="NLP Workshop: From Raw Text to Prediction", layout="wide")
@@ -40,6 +41,15 @@ except FileNotFoundError:
     st.error(
         "No trained model found yet. Run `python scripts/train.py` first, "
         "then restart this app."
+    )
+    st.stop()
+except PipelineSignatureMismatch:
+    st.error(
+        "⚠️ The saved model is out of sync with the current preprocessing "
+        "pipeline (preprocessing.py / config.py / feature_extraction.py "
+        "changed since it was trained). Live predictions would be "
+        "meaningless -- flat probabilities, same class always on top. "
+        "Run `python scripts/train.py` to retrain, then restart this app."
     )
     st.stop()
 
@@ -105,6 +115,15 @@ if predict_clicked:
         )
 
     st.subheader("3. TF-IDF: top features for this text")
+    if result["n_matched_features"] == 0:
+        st.warning(
+            "None of this text's words matched the training vocabulary, so "
+            "the TF-IDF vector is all zeros -- the prediction below reflects "
+            "only the model's learned class priors, not this text's content. "
+            "If you recently edited preprocessing.py / config.py / "
+            "feature_extraction.py, retrain with `python scripts/train.py` "
+            "first."
+        )
     if result["top_features"].empty:
         st.info("No TF-IDF features matched the training vocabulary for this text.")
     else:
